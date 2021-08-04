@@ -1,0 +1,213 @@
+﻿<!-- 2020, (C) Stanislav Povolotsky -->
+<html lang=ru>
+<head><title>Тренировка таблицы умножения</title>
+<!--
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+-->
+<link rel="stylesheet" href="res/bootstrap.min.css">
+<script src="res/jquery.min.js"></script>
+<script src="res/bootstrap.min.js"></script>
+<style>
+    .task-digit {
+        font-size: 30pt;
+        height: 250px;
+        text-align: center;
+    }
+    .vertical-align-row {
+        text-align: center;
+    }
+    .out-div {
+        --background-color: red;
+        display: table;
+    }
+    .in-div {
+        --background-color: blue;
+        height: 80px;
+        vertical-align:middle;
+        display: table-cell;
+    }
+    .bg-wrong {
+        background-color: red;
+        color: white;
+    }
+    .bg-right {
+        background-color: green;
+        color: white;
+    }
+    .timer-line {
+        font-size: 15pt;
+    }
+    .bg-timer-end {
+        background-color: red;
+        color: white;
+    }
+    .log-right {
+        background-color: green;
+        color: white;
+    }
+    .log-right-not-first {
+        background-color: orange;
+        color: white;
+    }
+    .log-wrong {
+        background-color: red;
+        color: white;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Тренировка таблицы умножения</h1>
+    <form role="form">
+        <div class="row vertical-align-row">
+            <div class="col-md-3 task-digit align-middle out-div"><div id="task-field-1" class="in-div">0</div></div>
+            <div class="col-md-1 task-digit align-middle out-div"><div id="task-field-sign" class="in-div">*</div></div>
+            <div class="col-md-3 task-digit align-middle out-div"><div id="task-field-2" class="in-div">0</div></div>
+            <div class="col-md-3 align-middle">
+                <div class="form-group">
+                    <input type="text" class="form-control input-lg task-digit" id="task-answer" placeholder="Ответ" autocomplete="off">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <button id='check-answer-button' type="submit" class="btn btn-default">Отправить</button>
+        </div>
+        <div class="row">
+            <br>
+            <p class="timer-line">Таймер: <span id=timer>0</span> секунд</p>
+            <p>Решено: <span id="total-solved">0</span> из <span id="total-tasks">0</span></p>
+            <p>Ошибок: <span id="total-errors">0</span></p>
+            <p>Не успел: <span id="total-timeouts">0</span></p>
+        </div>
+    </form>
+    <div class="row" id="log">
+    </div>
+</div>
+<script>
+    var start_time = $.now();
+    var time_to_solve = 8 * 1000;
+    var task_solved = true;
+    var all_tasks = new Array();
+    var init_tasks = new Array();
+    var cur_task = null;
+    var incorrect_answers = 0;
+    var g_stopped = true;
+    function stop_all() {
+      if(g_stopped) return;
+      g_stopped = true;
+      $("#task-answer").attr('disabled','disabled');
+    }
+    function start_all() {
+      if(!g_stopped) return;
+      g_stopped = false;
+      $("#task-answer").removeAttr('disabled');
+      new_task();
+      setTimeout(update_timer, 500);
+    }
+    function update_timer()
+    {
+        var passed = Math.max(0, time_to_solve - ($.now() - start_time));
+        var tsec = Math.floor(passed / 1000);
+        $('#timer').text(tsec);
+        if(passed == 0 && !task_solved) {
+            if(!$('#timer').hasClass('bg-timer-end')) {
+                $('#timer').addClass('bg-timer-end');
+            }
+        }
+        if(!g_stopped) {
+           setTimeout(update_timer, 500);
+        }
+    }
+    function new_task()
+    {
+        if(g_stopped) return;
+        $('#task-answer').removeClass('bg-right');
+        $('#task-answer').removeClass('bg-wrong');
+        $('#timer').removeClass('bg-timer-end');
+        task_solved = false;
+        while(all_tasks.length == 0) {
+          stop_all();
+          alert("Всё решено");
+          return;
+        }
+        start_time = $.now();
+        var idx = Math.floor(Math.random() * all_tasks.length);
+        cur_task = all_tasks[idx];
+        all_tasks.splice(idx, 1);
+        incorrect_answers = 0;
+        $('#task-field-1').text(cur_task['f1']);
+        $('#task-field-2').text(cur_task['f2']);
+        $('#task-field-sign').text(cur_task['sign']);
+        $('#task-answer').val('');
+        $('#task-answer').select();
+    }
+    function check_task()
+    {
+        $('#task-answer').select();
+        if(g_stopped) return;
+
+        var answt = $('#task-answer').val();
+        var answ = parseInt(answt);
+        if(answt !== '' && cur_task != null) {
+            if (answ == cur_task['answer']) {
+                if (!task_solved) {
+                    var bTimeout = $('#timer').hasClass('bg-timer-end');
+                    if (incorrect_answers > 0 || bTimeout) {
+                        if(bTimeout) {
+                          $('#total-timeouts').text(parseInt($('#total-timeouts').text()) + 1);
+                        }
+                        $('#log').prepend("<p class='log-right-not-first'>" + cur_task["expr"].toString() + " = " + answ.toString() + "</p>");
+                        all_tasks.push(cur_task);
+                    }
+                    else {
+                        $('#log').prepend("<p class='log-right'>" + cur_task["expr"].toString() + " = " + answ.toString() + "</p>");
+                    }
+                    if (!$('#task-answer').hasClass("bg-right")) {
+                        $('#task-answer').addClass('bg-right');
+                        task_solved = true;
+                        var n_solved = init_tasks.length - all_tasks.length;
+                        $('#total-solved').text(n_solved);
+                        setTimeout(new_task, 500);
+                    }
+                }
+            }
+            else {
+                if(incorrect_answers == 0) {
+                    $('#total-errors').text(parseInt($('#total-errors').text()) + 1);
+                }
+                ++incorrect_answers;
+                $('#log').prepend("<p class='log-wrong'>" + cur_task["expr"].toString() + " = " + answ.toString() + "</p>");
+                $('#task-answer').addClass('bg-wrong');
+            }
+        }
+    }
+    function init_tasks_fn()
+    {
+        var start_digit = 1;
+        var end_digit = 10;
+        var sign = "*";
+        for(var f1 = start_digit; f1 <= end_digit; ++f1) {
+            for(var f2 = start_digit; f2 <= end_digit; ++f2) {
+
+                init_tasks.push({'f1': f1, 'f2': f2, 'sign': sign, 'answer': f1 * f2,
+                    'expr': f1.toString() + " " + sign + " " + f2.toString() });
+            }
+        }
+        all_tasks = [...init_tasks];
+        $('#total-tasks').text(all_tasks.length);
+    }
+
+    $(document).ready(function()
+    {
+        init_tasks_fn();
+        $("form").submit(function(f){
+            f.preventDefault();
+            check_task();
+        });
+        start_all();
+    });
+</script>
+</body>
+</html>

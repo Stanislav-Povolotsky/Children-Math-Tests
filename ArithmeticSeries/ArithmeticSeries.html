@@ -1,0 +1,409 @@
+﻿<!-- 2020, (C) Stanislav Povolotsky -->
+<html lang=ru>
+<head><title>Ряды (выявление закономерностей)</title>
+<!--
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+-->
+<link rel="stylesheet" href="res/bootstrap.min.css">
+<script src="res/jquery.min.js"></script>
+<script src="res/bootstrap.min.js"></script>
+<style>
+    .task-digit {
+        font-size: 30pt;
+        height: 150px;
+        text-align: center;
+    }
+    .vertical-align-row {
+        text-align: center;
+    }
+    .out-div {
+        --background-color: red;
+        display: table;
+    }
+    .in-div {
+        --background-color: blue;
+        height: 80px;
+        vertical-align:middle;
+        display: table-cell;
+    }
+    .bg-wrong {
+        background-color: red;
+        color: white;
+    }
+    .bg-right {
+        background-color: green;
+        color: white;
+    }
+    .timer-line {
+        font-size: 15pt;
+    }
+    .bg-timer-end {
+        background-color: red;
+        color: white;
+    }
+    .log-right {
+        background-color: green;
+        color: white;
+    }
+    .log-right-not-first {
+        background-color: orange;
+        color: white;
+    }
+    .log-wrong {
+        background-color: red;
+        color: white;
+    }
+    .task-digit {
+         padding: 1px;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Ряды (выявление закономерностей)</h1>
+    <form role="form">
+        <div class="row vertical-align-row">
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-1"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" readonly=1/></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-2"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" readonly=1/></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-3"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" readonly=1/></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-4"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" readonly=1/></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-5"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" readonly=1/></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-6"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" readonly=1/></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-7"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" readonly=1/></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-8"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" readonly=1/></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-9"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" readonly=1/></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-10"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" readonly=1/></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-11"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" readonly=1/></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-12"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" readonly=1/></div></div>
+        </div>
+        <div class="row">
+            <button id='check-answer-button' type="submit" class="btn btn-default">Отправить</button>
+        </div>
+        <div class="row">
+            <br>
+            <p class="timer-line">Таймер: <span id=timer>0</span> секунд</p>
+            <p>Решено: <span id="total-solved">0</span> из <span id="total-tasks">0</span></p>
+            <p>Ошибок: <span id="total-errors">0</span></p>
+            <p>Не успел: <span id="total-timeouts">0</span></p>
+        </div>
+    </form>
+    <div class="row" id="log">
+    </div>
+</div>
+<script>
+    var start_time = $.now();
+    var time_to_solve = 120 * 1000;
+    var task_solved = true;
+    var all_tasks = new Array();
+    var init_tasks = new Array();
+    var cur_task = null;
+    var incorrect_answers = 0;
+    var g_stopped = true;
+    function stop_all() {
+      if(g_stopped) return;
+      g_stopped = true;
+      $(".task-digit").attr('disabled','disabled');
+    }
+    function start_all() {
+      if(!g_stopped) return;
+      g_stopped = false;
+      $(".task-digit").removeAttr('disabled');
+      new_task();
+      setTimeout(update_timer, 500);
+    }
+    function update_timer()
+    {
+        var passed = Math.max(0, time_to_solve - ($.now() - start_time));
+        var tsec = Math.floor(passed / 1000);
+        $('#timer').text(tsec);
+        if(passed == 0 && !task_solved) {
+            if(!$('#timer').hasClass('bg-timer-end')) {
+                $('#timer').addClass('bg-timer-end');
+            }
+        }
+        if(!g_stopped) {
+           setTimeout(update_timer, 500);
+        }
+    }
+    function new_task()
+    {
+        if(g_stopped) return;
+        $('.task-digit').removeClass('bg-right');
+        $('.task-digit').removeClass('bg-wrong');
+        $('#timer').removeClass('bg-timer-end');
+        task_solved = false;
+        while(all_tasks.length == 0) {
+          stop_all();
+          $('#log').prepend("<p>" + (new Date()).toLocaleDateString() + " " +  (new Date()).toLocaleTimeString() + "</p>");
+          alert("Всё решено");
+          return;
+        }
+        start_time = $.now();
+        var idx = Math.floor(Math.random() * all_tasks.length);
+        cur_task = all_tasks[idx];
+        all_tasks.splice(idx, 1);
+        incorrect_answers = 0;
+        answer_fields = 0;
+        anwers_tab_idx = [];
+        for(var i = 1; i <= 12; ++i) 
+        {
+          var fn = 'f' + i.toString();
+          var inp = $('#task-field-' + i + ' input');
+          if(fn in cur_task) 
+          {
+            fv = cur_task[fn];
+            var ro = !isNaN(fv);
+            inp.prop('readonly', ro);
+            inp.prop('tabindex', -1);
+            if(!ro) fv = '';
+            inp.val(fv);
+            inp.show();
+            inp.removeClass('task-answers');
+            if(!ro) { 
+              if(answer_fields == 0) inp.select();
+              inp.addClass('task-answers');
+              anwers_tab_idx.push(inp);
+              ++answer_fields; 
+            }
+          }
+          else {
+            inp.hide();
+            inp.removeClass('task-answers');
+            inp.val('');
+          }
+        }
+        for(var i = 0; i < anwers_tab_idx.length; ++i) {
+            anwers_tab_idx[i].prop('tabindex', i + 1);
+
+        }
+    }
+    function check_task()
+    {
+        if(g_stopped) return;
+        if(cur_task == null) return;
+
+        user_answers = [];
+        var first_user_input = null;
+        for(var i = 0; i < cur_task['answers'].length; ++i) {
+            var inp = $('#task-field-' + (i + 1) + ' input');
+            var v = parseInt(inp.val());
+            if(first_user_input == null && isNaN(cur_task['f' + (i + 1).toString()])) {
+                first_user_input = inp;
+            } 
+            if(isNaN(v)) {
+                inp.select();
+                return;
+            }
+            user_answers.push(v);
+        }
+        if (cur_task['check_answer'](cur_task, user_answers)) {
+            if (!task_solved) {
+                var bTimeout = $('#timer').hasClass('bg-timer-end');
+                if (incorrect_answers > 0 || bTimeout) {
+                    if(bTimeout) {
+                        $('#total-timeouts').text(parseInt($('#total-timeouts').text()) + 1);
+                    }
+                    $('#log').prepend("<p class='log-right-not-first'>" + cur_task['fmt_answer'](user_answers) + "</p>");
+                    all_tasks.push(cur_task);
+                }
+                else {
+                    $('#log').prepend("<p class='log-right'>" + cur_task['fmt_answer'](user_answers) + "</p>");
+                }
+                if (!$('.task-answers').hasClass("bg-right")) {
+                    $('.task-answers').addClass('bg-right');
+                    task_solved = true;
+                    var n_solved = init_tasks.length - all_tasks.length;
+                    $('#total-solved').text(n_solved);
+                    setTimeout(new_task, 500);
+                }
+            }
+        }
+        else {
+            if(incorrect_answers == 0) {
+                $('#total-errors').text(parseInt($('#total-errors').text()) + 1);
+            }
+            ++incorrect_answers;
+            $('#log').prepend("<p class='log-wrong'>" + cur_task['fmt_answer'](user_answers) + "</p>");
+            $('.task-answers').addClass('bg-wrong');
+            if(first_user_input) first_user_input.select();
+        }
+    }
+    function init_tasks_fn()
+    {
+        init_tasks = new Array();
+
+        var fnCheckAnswerSeriesDefault = function(cur_task, user_answers) {
+            var bCorrect = false;
+            if(user_answers.length == cur_task['answers'].length) {
+                bCorrect = true;
+                for(var i = 0; i < user_answers.length; ++i) {
+                    if(user_answers[i] !== cur_task['answers'][i]) {
+                        bCorrect = false;
+                        break;
+                    }
+                }
+            }
+            return bCorrect;
+        };
+        var fnFmtAnswerSeriesDefault = function(user_answers) {
+          return user_answers.join(', ');
+        };
+
+        var fnPrepareSeriesTask = function(digits, digits_answer, task_args) {
+            task = { 'expr': '', 'answers': digits_answer, 'check_answer': fnCheckAnswerSeriesDefault, 'fmt_answer': fnFmtAnswerSeriesDefault, 'task_args': task_args};
+            for(var i = 0; i < digits.length; ++i) {
+                task['f' + (i + 1)] = digits[i];
+                task['expr'] += ((task['expr'].length == 0) ? '' : ', ') + digits[i].toString();
+            }
+            return task;
+        };
+
+
+        // -----------------------------------------------------------------------------
+        // Common generation options
+
+        var max_abs_limit_number = 300;
+
+        // -----------------------------------------------------------------------------
+        // Ряды вида: next = a * prev + b
+
+        var n_use_simple_series = 30;
+        var start_num_min = -1;
+        var start_num_max = 4;
+        var total_items = 8;
+        var unknown_items = 3;
+        var b_min = -6;
+        var b_max = 6;
+        var a_min = -3;
+        var a_max = 4;
+        var init_tasks_simple_series = new Array();
+
+        for(var n_add_step = b_min; n_add_step <= b_max; ++n_add_step) 
+        {
+            for(var n_mul_step = a_min; n_mul_step <= a_max; ++n_mul_step) 
+            {
+                if(n_add_step == 0 && n_mul_step == 1 || n_mul_step == 0) continue;
+
+                start_num = start_num_min + Math.floor(Math.random() * (start_num_max - start_num_min + 1));
+                digits_answer = [];
+                cur_num = start_num;
+                diff_digits = {};
+                for(var i = 0; i < total_items; ++i) {
+                    digits_answer.push(cur_num);
+                    diff_digits[cur_num] = 1;
+                    cur_num = (cur_num * n_mul_step) + n_add_step;
+                }
+                if(Object.keys(diff_digits).length <= 2) continue;
+                var cur_num_min = Math.min( ...digits_answer );
+                var cur_num_max = Math.max( ...digits_answer );
+                if(Math.abs(cur_num_min) > max_abs_limit_number || Math.abs(cur_num_max) > max_abs_limit_number) continue;
+
+                digits = [...digits_answer];
+                for(var i = 0; i < unknown_items; ++i) {
+                    digits[digits.length - i - 1] = NaN;
+                }
+
+                init_tasks_simple_series.push(fnPrepareSeriesTask(digits, digits_answer, {'a': n_mul_step, 'b': n_add_step}));
+            }
+        }
+
+
+	used_idx = new Set();
+        for(var i = 0; i < n_use_simple_series; ++i) {
+	 idx = Math.floor(Math.random() * init_tasks_simple_series.length);
+	 if(used_idx.has(idx)) {
+	  //--i;
+	  continue;
+	 }
+         init_tasks.push(init_tasks_simple_series[idx]);
+	 used_idx.add(idx);
+        }
+
+        // -----------------------------------------------------------------------------
+        // Ряды вида: 
+        //   a[1] = a[0] + x1
+        //   a[2] = a[1] + x2
+        //   a[3] = a[2] + x3
+        //   a[4] = a[3] + x4
+
+        var n_use_template_series = 30;
+        var n_x_vec_min = 2;
+        var n_x_vec_max = 4;
+        var start_num_min = -1;
+        var start_num_max = 4;
+        var total_items = 8;
+        var unknown_items = 3;
+        var x_min = -10;
+        var x_max = 10;
+        var min_series_len  = 7;
+        var init_tasks_template_series = new Array();
+
+        for(var x_vec_len = n_x_vec_min; x_vec_len <= n_x_vec_max; ++x_vec_len) 
+        {
+            cur_total_items = Math.max(min_series_len, x_vec_len * 3);
+            cur_unknown_items = unknown_items;
+            if(x_vec_len == 2) {
+                cur_unknown_items = 2;
+            }
+            if(cur_total_items > 12) continue;
+	    for(nTest = 0; nTest < 50; ++nTest)
+            {
+                if(n_add_step == 0 && n_mul_step == 1 || n_mul_step == 0) continue;
+
+                start_num = start_num_min + Math.floor(Math.random() * (start_num_max - start_num_min + 1));
+                digits_answer = [];
+                x_vec = [];
+                for(var i = 0; i < x_vec_len; ++i) {
+                    xi = x_min + Math.floor(Math.random() * (x_max - x_min + 1));
+                    x_vec.push(xi);
+                }
+                cur_num = start_num;
+                for(var i = 0; i < cur_total_items; ++i) {
+                    digits_answer.push(cur_num);
+                    diff_digits[cur_num] = 1;
+                    cur_num = cur_num + x_vec[i % x_vec.length];
+                }
+                var cur_num_min = Math.min( ...digits_answer );
+                var cur_num_max = Math.max( ...digits_answer );
+                if(Math.abs(cur_num_min) > max_abs_limit_number || Math.abs(cur_num_max) > max_abs_limit_number) continue;
+
+                digits = [...digits_answer];
+                for(var i = 0; i < cur_unknown_items; ++i) {
+                    digits[digits.length - i - 1] = NaN;
+                }
+
+                init_tasks_template_series.push(fnPrepareSeriesTask(digits, digits_answer, {'xvec': x_vec}));
+            }
+        }
+
+	used_idx = new Set();
+        for(var i = 0; i < n_use_template_series; ++i) {
+	 idx = Math.floor(Math.random() * init_tasks_template_series.length);
+	 if(used_idx.has(idx)) {
+	  --i;
+	  continue;
+	 }
+         init_tasks.push(init_tasks_template_series[idx]);
+	 used_idx.add(idx);
+        }
+
+        // -----------------------------------------------------------------------------
+        all_tasks = [...init_tasks];
+        $('#total-tasks').text(all_tasks.length);
+        $('#log').prepend("<p>" + (new Date()).toLocaleDateString() + " " +  (new Date()).toLocaleTimeString() + "</p>");
+    }
+
+    $(document).ready(function()
+    {
+        init_tasks_fn();
+        $("form").submit(function(f){
+            f.preventDefault();
+            check_task();
+        });
+        start_all();
+    });
+</script>
+</body>
+</html>
