@@ -1,0 +1,427 @@
+﻿<!-- 2021, (C) Stanislav Povolotsky -->
+<html lang=ru>
+<head><title>Разложение чисел на простые множители</title>
+<!--
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+-->
+<link rel="stylesheet" href="res/bootstrap.min.css">
+<script src="res/jquery.min.js"></script>
+<script src="res/bootstrap.min.js"></script>
+<style>
+    .task-digit {
+        font-size: 30pt;
+        height: 150px;
+        text-align: center;
+    }
+    .vertical-align-row {
+        text-align: center;
+    }
+    .out-div {
+        --background-color: red;
+        display: table;
+    }
+    .in-div {
+        --background-color: blue;
+        height: 80px;
+        vertical-align:middle;
+        display: table-cell;
+    }
+    .bg-wrong {
+        background-color: red;
+        color: white;
+    }
+    .bg-right {
+        background-color: green;
+        color: white;
+    }
+    .timer-line {
+        font-size: 15pt;
+    }
+    .bg-timer-end {
+        background-color: red;
+        color: white;
+    }
+    .log-right {
+        background-color: green;
+        color: white;
+    }
+    .log-right-not-first {
+        background-color: orange;
+        color: white;
+    }
+    .log-wrong {
+        background-color: red;
+        color: white;
+    }
+    .task-digit {
+         padding: 1px;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Разложение чисел на простые множители</h1>
+    <div id='test-start-form'>
+      <div id='test-options'>
+      </div>
+      <hr><p><a class="btn btn-info" role="button" id='start-test-button'>Начать тест &raquo;</a></p>
+    </div>
+    <div id='test-main' style="display: none">
+      <form role="form">
+        <div class="row vertical-align-row">
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-1"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-2"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-3"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-4"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-5"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-6"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-7"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-8"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-9"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-10"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-11"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-12"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+        </div>
+        <div class="row">
+            <button id='check-answer-button' type="submit" class="btn btn-default">Отправить</button>
+        </div>
+        <div class="row">
+            <br>
+            <p class="timer-line">Таймер: <span id=timer>0</span> секунд</p>
+            <p>Решено: <span id="total-solved">0</span> из <span id="total-tasks">0</span></p>
+            <p>Ошибок: <span id="total-errors">0</span></p>
+            <p>Не успел: <span id="total-timeouts">0</span></p>
+        </div>
+      </form>
+      <div class="row" id="log">
+      </div>
+    </div><!-- #test-main -->
+</div>
+<script>
+    var start_time = $.now();
+    var time_to_solve = 120 * 1000;
+    var task_solved = true;
+    var all_tasks = new Array();
+    var init_tasks = new Array();
+    var cur_task = null;
+    var incorrect_answers = 0;
+    var g_stopped = true;
+    function stop_all() {
+      if(g_stopped) return;
+      g_stopped = true;
+      $(".task-digit").attr('disabled','disabled');
+    }
+    function start_all() {
+      if(!g_stopped) return;
+      g_stopped = false;
+      $(".task-digit").removeAttr('disabled');
+      new_task();
+      setTimeout(update_timer, 500);
+    }
+    function update_timer()
+    {
+        var passed = Math.max(0, time_to_solve - ($.now() - start_time));
+        var tsec = Math.floor(passed / 1000);
+        $('#timer').text(tsec);
+        if(passed == 0 && !task_solved) {
+            if(!$('#timer').hasClass('bg-timer-end')) {
+                $('#timer').addClass('bg-timer-end');
+            }
+        }
+        if(!g_stopped) {
+           setTimeout(update_timer, 500);
+        }
+    }
+    function new_task()
+    {
+        if(g_stopped) return;
+        $('.task-digit').removeClass('bg-right');
+        $('.task-digit').removeClass('bg-wrong');
+        $('#timer').removeClass('bg-timer-end');
+        task_solved = false;
+        while(all_tasks.length == 0) {
+          stop_all();
+          $('#log').prepend("<p>" + (new Date()).toLocaleDateString() + " " +  (new Date()).toLocaleTimeString() + "</p>");
+          alert("Всё решено");
+          return;
+        }
+        start_time = $.now();
+        var idx = Math.floor(Math.random() * all_tasks.length);
+        cur_task = all_tasks[idx];
+        all_tasks.splice(idx, 1);
+        incorrect_answers = 0;
+        answer_fields = 0;
+        anwers_tab_idx = [];
+        for(var i = 1; i <= 12; ++i) 
+        {
+          var fn = 'f' + i.toString();
+          var inp = $('#task-field-' + i + ' input');
+          if(fn in cur_task) 
+          {
+            fv = cur_task[fn];
+            var ro = !isNaN(fv) || ($.type(fv) === "string");
+            inp.prop('readonly', ro);
+            inp.prop('tabindex', -1);
+            if(!ro) fv = '';
+            inp.val(fv);
+            inp.show();
+            inp.removeClass('task-answers');
+            if(!ro) { 
+              if(answer_fields == 0) inp.select();
+              inp.addClass('task-answers');
+              anwers_tab_idx.push(inp);
+              ++answer_fields; 
+            }
+          }
+          else {
+            inp.hide();
+            inp.removeClass('task-answers');
+            inp.val('');
+          }
+        }
+        for(var i = 0; i < anwers_tab_idx.length; ++i) {
+            anwers_tab_idx[i].prop('tabindex', i + 1);
+
+        }
+    }
+    function check_task()
+    {
+        if(g_stopped) return;
+        if(cur_task == null) return;
+
+        user_answers = [];
+        var first_user_input = null;
+        for(var i = 0; i < 12; ++i) {
+            var inp = $('#task-field-' + (i + 1) + ' input');
+            var v = parseInt(inp.val());
+            var v_empty = inp.val().length == 0;
+            var fv = cur_task['f' + (i + 1).toString()];
+            var ro = !isNaN(fv) || ($.type(fv) === "string");
+            if(ro) continue;
+            if(first_user_input == null) {
+                first_user_input = inp;
+            } 
+            if(v_empty) {
+                inp.select();
+                //if(user_answers.length < cur_task["answers"].length) return;
+            }
+            else {
+              user_answers.push(v);
+            }
+        }
+        if (cur_task['check_answer'](cur_task, user_answers)) {
+            if (!task_solved) {
+                var bTimeout = $('#timer').hasClass('bg-timer-end');
+                if (incorrect_answers > 0 || bTimeout) {
+                    if(bTimeout) {
+                        $('#total-timeouts').text(parseInt($('#total-timeouts').text()) + 1);
+                    }
+                    $('#log').prepend("<p class='log-right-not-first'>" + cur_task['fmt_answer'](user_answers, cur_task) + "</p>");
+                    all_tasks.push(cur_task);
+                }
+                else {
+                    $('#log').prepend("<p class='log-right'>" + cur_task['fmt_answer'](user_answers, cur_task) + "</p>");
+                }
+                if (!$('.task-answers').hasClass("bg-right")) {
+                    $('.task-answers').addClass('bg-right');
+                    task_solved = true;
+                    var n_solved = init_tasks.length - all_tasks.length;
+                    $('#total-solved').text(n_solved);
+                    setTimeout(new_task, 500);
+                }
+            }
+        }
+        else {
+            if(incorrect_answers == 0) {
+                $('#total-errors').text(parseInt($('#total-errors').text()) + 1);
+            }
+            ++incorrect_answers;
+            $('#log').prepend("<p class='log-wrong'>" + cur_task['fmt_answer'](user_answers, cur_task) + "</p>");
+            $('.task-answers').addClass('bg-wrong');
+            if(first_user_input) first_user_input.select();
+        }
+    }
+    function init_tasks_fn()
+    {
+        var fnCheckAnswerFactorization = function(cur_task, user_answers) {
+            var bCorrect = false;
+            var user_answers_sorted = [...user_answers];
+            user_answers_sorted.sort(function(a, b) { return a - b; });
+            if(user_answers_sorted.length == cur_task['answers'].length) {
+                bCorrect = true;
+                for(var i = 0; i < user_answers.length; ++i) {
+                    if(user_answers_sorted[i] !== cur_task['answers'][i]) {
+                        bCorrect = false;
+                        break;
+                    }
+                }
+            }
+            return bCorrect;
+        };
+        var fnFmtAnswerFactorization = function(user_answers, task) {
+          return task['expr'] + ' = ' + user_answers.join(' × ');
+        };
+
+        // -----------------------------------------------------------------------------
+        // Tasks generation
+
+        var n_tests = all_options_map['n_tests'].value;
+        var a_min = 1;
+        var a_max = all_options_map['max_a'].value;
+        var min_factors = all_options_map['minfactors'].value;
+        var max_factors = all_options_map['maxfactors'].value;
+        var opt_hint_with_placeholders = all_options_map['placeholder_tips'].value;
+        var init_tasks_t1 = new Array();
+	used_num = new Set();
+
+	n_retry = 0;
+        max_retries = 100;
+        while(init_tasks_t1.length < n_tests)
+        {
+            var a = 0;
+            while(1) {
+              if(++n_retry > max_retries) break;
+              a = a_min + Math.floor(Math.random() * (a_max - a_min + 1));
+       	      if(!used_num.has(a)) break;
+            }
+            if(n_retry > max_retries) break;
+
+            var answers = new Array();
+            var cur_a = a;
+            while(cur_a > 1)
+            {
+              for(var j = 2; j <= cur_a; ++j)
+              {
+                if((cur_a % j) == 0)
+                {
+                  answers.push(j);
+                  cur_a = cur_a / j;
+                  break;
+                }
+              }
+            }
+            if(answers.length < 1) {
+              answers.push(cur_a);
+            }
+            if(answers.length > max_factors || answers.length < min_factors) { 
+              // too many or too few factors
+              continue;
+            }
+            task = { 'expr': a, 'answers': answers, 'check_answer': fnCheckAnswerFactorization, 'fmt_answer': fnFmtAnswerFactorization, 'task_args': {'a': a}};
+            task['f1'] = a;
+            task['f2'] = '=';
+            for(var i = 3; i <= 12; ++i) {
+                var p = i - 3;
+                if(opt_hint_with_placeholders && (p >= answers.length)) break;
+                task['f' + i] = (p < answers.length) ? NaN : NaN;
+            }
+            init_tasks_t1.push(task);
+   	    used_num.add(a);
+            n_retry = 0;
+        }
+
+        // -----------------------------------------------------------------------------
+        init_tasks = [].concat(init_tasks_t1/*, ...*/);
+        all_tasks = [...init_tasks];
+        $('#total-tasks').text(all_tasks.length);
+        $('#log').prepend("<p>" + (new Date()).toLocaleDateString() + " " +  (new Date()).toLocaleTimeString() + "</p>");
+    }
+
+    var all_options = [
+        {'name': 'n_tests',           'description': 'Количество заданий',                    'type': 'number',  'value': 50,  'min-value': 1,  'max-value': 1000},
+        {'name': 'complex',           'description': 'Сложность',                             'type': 'number',  'value': 0,   'min-value': 0,  'max-value': 100},
+        {'name': 'maxtime',           'description': 'Макс. время ответа (сек)',              'type': 'number',  'value': 120, 'min-value': 3,  'max-value': 600},
+        {'name': 'minfactors',        'description': 'Минимальное количество множителей',     'type': 'number',  'value': 2,   'min-value': 1,  'max-value': 4},
+        {'name': 'maxfactors',        'description': 'Максимальное количество множителей',    'type': 'number',  'value': 3,   'min-value': 2,  'max-value': 10},
+        {'name': 'max_a',             'description': 'Максимальное число',                    'type': 'number',  'value': 200, 'min-value': 10, 'max-value': 10000},
+        {'name': 'placeholder_tips',  'description': 'Подсказка (число множителей)',          'type': 'boolean', 'value': true},
+    ];
+    var all_options_map = {};
+
+    function init_ui_options()
+    {
+       for (let opt of all_options) 
+       {
+         var opt_html = '';
+         if(opt['type'] === 'number') {
+           opt_html = 
+           `<div class="input-group">
+             <div class="input-group-prepend"><span class="input-group-text">${opt['description']}</span></div>
+             <input min="${opt['min-value']}" max="${opt['max-value']}" value="${opt['value']}" type="text" class="form-control" name="input_text_testopt_${opt['name']}" id="input_text_testopt_${opt['name']}" onchange="rangeinput_testopt_${opt['name']}.value = input_text_testopt_${opt['name']}.value; on_updated_param('${opt['name']}', input_text_testopt_${opt['name']}.value);" />
+             <input min="${opt['min-value']}" max="${opt['max-value']}" value="${opt['value']}" step="1" type="range" class="form-control-range slider" type="range" id="rangeinput_testopt_${opt['name']}" onchange="input_text_testopt_${opt['name']}.value = rangeinput_testopt_${opt['name']}.value; on_updated_param('${opt['name']}', rangeinput_testopt_${opt['name']}.value);" oninput="input_text_testopt_${opt['name']}.value = rangeinput_testopt_${opt['name']}.value; on_updated_param('${opt['name']}', rangeinput_testopt_${opt['name']}.value);">
+           </div>`;
+         }
+         else if(opt['type'] === 'boolean') {
+           var checkbox_checked = opt["value"] ? "checked" : "";
+           opt_html = 
+           `<div class="input-group">
+             <div class="input-group-prepend"><span class="input-group-text">${opt['description']}</span></div>
+             <input type="checkbox" class="form-control" name="input_checkbox_testopt_${opt['name']}" id="input_checkbox_testopt_${opt['name']}" onchange="on_updated_param('${opt['name']}', input_checkbox_testopt_${opt['name']}.checked);" ${checkbox_checked} />
+           </div>`;
+         }
+         $('#test-options').append(opt_html);
+         all_options_map[opt['name']] = opt;
+       }
+    }
+    function update_ui_options_values(exclude_options = [])
+    {
+       for (let opt of all_options) 
+       {
+         if(exclude_options.includes(opt['name'])) continue;
+         if(opt['type'] === 'number') {
+           $(`#input_text_testopt_${opt['name']}`).val(opt['value'].toString());
+           $(`#rangeinput_testopt_${opt['name']}`).val(opt['value'].toString());
+           //console.log(`Setting UI ${opt['name']} to ${opt['value']}`);
+         }
+         else if(opt['type'] === 'boolean') {
+           $(`#input_checkbox_testopt_${opt['name']}`).prop("checked", opt['value']);
+           //console.log(`Setting UI ${opt['name']} to ${opt['value']}`);
+         }
+       }
+    }
+
+    function clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
+    function on_updated_param(opt_name, opt_value)
+    {
+      console.log(`Updated ${opt_name} to ${opt_value}`);
+      opt = all_options_map[opt_name];
+      if(opt['type'] === 'number') opt_value = parseInt(opt_value);
+      opt['value'] = opt_value;
+
+      if(opt_name === 'complex') {
+        all_options_map['minfactors']['value'] = clamp(Math.floor(1 + opt_value / 30), 1, 3);
+        all_options_map['maxfactors']['value'] = clamp(Math.floor(2 + opt_value / 5), 1, 10);
+        all_options_map['max_a']['value'] = 200 + opt_value * 10;
+        all_options_map['placeholder_tips']['value'] = Math.floor(opt_value / 10) == 0;
+        update_ui_options_values([opt_value]);
+      }
+      else {
+        all_options_map['complex']['value'] = '?';
+        //update_ui_options_values(['complex']);
+      }
+    }
+
+    $(document).ready(function() {
+      init_ui_options();
+      $('#start-test-button').click(function()
+      {
+          $('#start-test-button').addClass('disabled');
+          $('#test-start-form').hide();
+          init_tasks_fn();
+          $("form").submit(function(f){
+              f.preventDefault();
+              check_task();
+          });
+          start_all();
+          $('#test-main').show();
+      });
+    });
+
+</script>
+</body>
+</html>
