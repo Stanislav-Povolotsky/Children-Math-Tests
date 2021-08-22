@@ -144,7 +144,8 @@
         while(all_tasks.length == 0) {
           stop_all();
           $('#log').prepend("<p>" + (new Date()).toLocaleDateString() + " " +  (new Date()).toLocaleTimeString() + "</p>");
-          alert("Всё решено");
+          $('#log').prepend("<p>Настройки: " + options_to_str() + "</p>");
+          setTimeout(function() { alert("Всё решено"); }, 100); 
           return;
         }
         start_time = $.now();
@@ -326,7 +327,10 @@
         init_tasks = [].concat(init_tasks_t1/*, ...*/);
         all_tasks = [...init_tasks];
         $('#total-tasks').text(all_tasks.length);
+        $('#log').prepend("<p>Настройки: " + options_to_str() + "</p>");
         $('#log').prepend("<p>" + (new Date()).toLocaleDateString() + " " +  (new Date()).toLocaleTimeString() + "</p>");
+        start_time = $.now();
+        time_to_solve = all_options_map['maxtime'].value * 1000;
     }
 
     var all_options = [
@@ -396,7 +400,7 @@
       if(opt_name === 'complex') {
         all_options_map['minfactors']['value'] = clamp(Math.floor(1 + opt_value / 30), 1, 3);
         all_options_map['maxfactors']['value'] = clamp(Math.floor(2 + opt_value / 5), 1, 10);
-        all_options_map['max_a']['value'] = 200 + opt_value * 10;
+        all_options_map['max_a']['value'] = 100 + opt_value * 20;
         all_options_map['placeholder_tips']['value'] = Math.floor(opt_value / 10) == 0;
         update_ui_options_values([opt_value]);
       }
@@ -404,6 +408,13 @@
         all_options_map['complex']['value'] = '?';
         //update_ui_options_values(['complex']);
       }
+    }
+
+    function options_to_str()
+    { 
+      return all_options.map( function( opt ) { 
+        return opt['description'] + ': ' + opt['value']; } 
+      ).join('; '); 
     }
 
     $(document).ready(function() {
