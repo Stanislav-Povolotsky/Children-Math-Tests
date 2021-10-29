@@ -1,0 +1,649 @@
+﻿<!-- 2021, (C) Stanislav Povolotsky -->
+<html lang=ru>
+<head><title>Преобразование данных</title>
+<!--
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+-->
+<link rel="stylesheet" href="res/bootstrap.min.css">
+<script src="res/jquery.min.js"></script>
+<script src="res/bootstrap.min.js"></script>
+<style>
+    .task-digit {
+        font-size: 30pt;
+        height: 100px;
+        text-align: center;
+    }
+    .vertical-align-row {
+        text-align: center;
+    }
+    .out-div {
+        --background-color: red;
+        display: table;
+    }
+    .in-div {
+        --background-color: blue;
+        height: 80px;
+        vertical-align:middle;
+        display: table-cell;
+    }
+    .bg-wrong {
+        background-color: red;
+        color: white;
+    }
+    .bg-right {
+        background-color: green;
+        color: white;
+    }
+    .digit-wrong {
+        color: red;
+    }
+    .digit-right {
+        color: green;
+    }
+    .timer-line {
+        font-size: 15pt;
+    }
+    .bg-timer-end {
+        background-color: red;
+        color: white;
+    }
+    .log-right {
+        background-color: green;
+        color: white;
+    }
+    .log-right-not-first {
+        background-color: orange;
+        color: white;
+    }
+    .log-wrong {
+        background-color: red;
+        color: white;
+    }
+    .task-digit {
+         padding: 1px;
+    }
+    .solution-hint {
+         color: gray;
+    }
+    .input-group {
+         width: 100%;
+         padding: 1pt;
+    }
+    #test-options {
+         width: 50%;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Преобразование данных</h1>
+    <div id='test-start-form'>
+      <div id='test-options'>
+      </div>
+      <hr><p><a class="btn btn-info" role="button" id='start-test-button'>Начать тест &raquo;</a></p>
+    </div>
+    <div id='test-main' style="display: none">
+      <form role="form">
+        <label for="task-field-f1">Исходный ряд:</label>
+        <div class="row vertical-align-row">
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-f1"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-f2"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-f3"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-f4"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-f5"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-f6"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-f7"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-f8"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-f9"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-f10"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-f11"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-f12"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+        </div>
+        <label for="task-field-f1">Желаемый ряд:</label>
+        <div class="row vertical-align-row">
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-s1"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-s2"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-s3"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-s4"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-s5"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-s6"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-s7"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-s8"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-s9"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-s10"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-s11"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-s12"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+        </div>
+        <span class='solution-hint'><span>Подсказка. Применены преобразования: </span><label for="task-field-s1" id='solution-hint'></label></span>
+        <div class="row vertical-align-row">
+            <div class="col-md-12 task-digit align-middle out-div" id="task-field-answer"><div class="form-group"><input type="text" class="form-control input-lg task-digit" placeholder="Формула трансформации ряда с использованием a[i] или x" autocomplete="off" /></div></div>
+        </div>
+        <label for="task-field-f1">Ряд, получаемый по введённой формуле:</label>
+        <div class="row vertical-align-row">
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-r1"><div class="form-group"><input readonly tabindex=-1 type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-r2"><div class="form-group"><input readonly tabindex=-1 type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-r3"><div class="form-group"><input readonly tabindex=-1 type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-r4"><div class="form-group"><input readonly tabindex=-1 type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-r5"><div class="form-group"><input readonly tabindex=-1 type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-r6"><div class="form-group"><input readonly tabindex=-1 type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-r7"><div class="form-group"><input readonly tabindex=-1 type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-r8"><div class="form-group"><input readonly tabindex=-1 type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-r9"><div class="form-group"><input readonly tabindex=-1 type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-r10"><div class="form-group"><input readonly tabindex=-1 type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-r11"><div class="form-group"><input readonly tabindex=-1 type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+            <div class="col-md-1 task-digit align-middle out-div" id="task-field-r12"><div class="form-group"><input readonly tabindex=-1 type="text" class="form-control input-lg task-digit" placeholder="?" autocomplete="off" /></div></div>
+        </div>
+        <div class="row">
+            <button id='check-answer-button' type="submit" class="btn btn-default">Отправить</button>
+        </div>
+        <div class="row">
+            <br>
+            <p class="timer-line">Таймер: <span id=timer>0</span> секунд</p>
+            <p>Решено: <span id="total-solved">0</span> из <span id="total-tasks">0</span></p>
+            <p>Ошибок: <span id="total-errors">0</span></p>
+            <p>Не успел: <span id="total-timeouts">0</span></p>
+        </div>
+      </form>
+      <div class="row" id="log">
+      </div>
+    </div><!-- #test-main -->
+</div>
+<script>
+    var start_time = $.now();
+    var time_to_solve = 120 * 1000;
+    var task_solved = true;
+    var all_tasks = new Array();
+    var init_tasks = new Array();
+    var cur_task = null;
+    var incorrect_answers = 0;
+    var g_stopped = true;
+    var g_last_user_input_correct = false;
+    function stop_all() {
+      if(g_stopped) return;
+      g_stopped = true;
+      $(".task-digit").attr('disabled','disabled');
+    }
+    function start_all() {
+      if(!g_stopped) return;
+      g_stopped = false;
+      $(".task-digit").removeAttr('disabled');
+      new_task();
+      setTimeout(update_timer, 500);
+    }
+    function update_timer()
+    {
+        var passed = Math.max(0, time_to_solve - ($.now() - start_time));
+        var tsec = Math.floor(passed / 1000);
+        $('#timer').text(tsec);
+        if(passed == 0 && !task_solved) {
+            if(!$('#timer').hasClass('bg-timer-end')) {
+                $('#timer').addClass('bg-timer-end');
+            }
+        }
+        if(!g_stopped) {
+           setTimeout(update_timer, 500);
+        }
+    }
+    function new_task()
+    {
+        if(g_stopped) return;
+        $('.task-digit').removeClass('bg-right').removeClass('bg-wrong').removeClass('digit-right').removeClass('digit-wrong');
+        $('#timer').removeClass('bg-timer-end');
+        task_solved = false;
+        g_last_user_input_correct = false;
+        while(all_tasks.length == 0) {
+          stop_all();
+          $('#log').prepend("<p>" + (new Date()).toLocaleDateString() + " " +  (new Date()).toLocaleTimeString() + "</p>");
+          $('#log').prepend("<p>Настройки: " + options_to_str() + "</p>");
+          setTimeout(function() { alert("Всё решено"); }, 100); 
+          return;
+        }
+        start_time = $.now();
+        var idx = Math.floor(Math.random() * all_tasks.length);
+        cur_task = all_tasks[idx];
+        all_tasks.splice(idx, 1);
+        incorrect_answers = 0;
+        answer_fields = 0;
+        anwers_tab_idx = [];
+        for(const prefix of ['f', 's', 'r']) 
+        {
+          var b_readonly_formula_result = prefix === 'r';
+          //console.log(prefix);
+          for(var i = 1; i <= 12; ++i) 
+          {
+            var fn = prefix + i.toString();
+            var fn_s = 's' + i.toString();
+            var inp = $('#task-field-' + fn + ' input');
+            //console.log(fn);
+            if((fn in cur_task) || (b_readonly_formula_result && (fn_s in cur_task)))
+            {
+              fv = !b_readonly_formula_result ? cur_task[fn] : '?';
+              //console.log(fn + ': ' + fv);
+              var ro = !isNaN(fv) || ($.type(fv) === "string");
+              inp.prop('readonly', ro);
+              inp.prop('tabindex', -1);
+              if(!ro) fv = '';
+              inp.val(fv);
+              inp.show();
+              inp.removeClass('task-answers');
+              if(!ro) { 
+                if(answer_fields == 0) inp.select();
+                inp.addClass('task-answers');
+                anwers_tab_idx.push(inp);
+                ++answer_fields; 
+              }
+            }
+            else {
+              inp.hide();
+              inp.removeClass('task-answers');
+              inp.val('');
+            }
+          }
+        }
+        for(var i = 0; i < anwers_tab_idx.length; ++i) {
+            anwers_tab_idx[i].prop('tabindex', i + 1);
+        }
+        hint = $('.solution-hint');
+        hint.hide();
+        if(('hint' in cur_task) && all_options_map['show_hint'].value) {
+          hint.children('label').text(cur_task['hint']);
+          hint.show();
+        }
+        $('#task-field-answer input').val('');
+        changed_user_answer();
+    }
+    var g_last_user_answer = null;
+    var g_user_answer_control = "#task-field-answer div input";
+    function reset_user_answer()
+    {
+      g_last_user_answer = null;
+      $(g_user_answer_control).val('')
+    }
+    function changed_user_answer()
+    {
+        if(g_stopped) return;
+        if(cur_task == null) return;
+        var new_val = $(g_user_answer_control).val().trim();
+        if(new_val === g_last_user_answer) return;
+        g_last_user_answer = new_val;
+
+        var btn = $('#check-answer-button').attr('disabled', true);
+        const a = [...cur_task['task_args']['src']];
+        const N = cur_task['task_args']['src'].length;
+        const n = N;
+        //console.log(a);
+        var correct = true;
+        for(var idx = 1; idx <= N; ++idx)
+        {
+            const i = idx - 1;
+            var fn = 'r' + idx.toString();
+            var fn_f = 'f' + idx.toString();
+            var fn_s = 's' + idx.toString();
+            var inp = $('#task-field-' + fn + ' input');
+            var res = '';
+            const x = a[i];
+            if(new_val.length > 0) {
+              var test_res = null;
+              try {
+                test_res = eval(new_val);
+              } catch (error) {
+                test_res = null;
+              }
+              if((typeof test_res == 'number') && isFinite(test_res)) {
+                res = test_res;
+              }
+              inp.removeClass('digit-right').removeClass('digit-wrong');
+              if(i < cur_task['task_args']['target'].length) {
+                cur_correct = (res !== '' && res == cur_task['task_args']['target'][i].toString());
+                if(res !== '') inp.addClass(cur_correct ? 'digit-right' : 'digit-wrong');
+                correct = correct && cur_correct;
+              }
+            }
+            inp.val(res);
+        }
+        if(correct) btn.removeAttr('disabled');
+        //console.log(correct);
+        g_last_user_input_correct = correct;
+    }
+    $(g_user_answer_control).change(changed_user_answer);
+    $(g_user_answer_control).keyup(changed_user_answer);
+    function check_task()
+    {
+        if(g_stopped) return;
+        if(cur_task == null) return;
+
+        user_answers = [];
+        var answer = $('#task-field-answer input').val().trim();
+        user_answers.push(answer);
+        var first_user_input = null;
+        /*
+        for(var i = 0; i < 12; ++i) {
+            var inp = $('#task-field-' + (i + 1) + ' input');
+            var v = parseInt(inp.val());
+            var v_empty = inp.val().length == 0;
+            var fv = cur_task['f' + (i + 1).toString()];
+            var ro = !isNaN(fv) || ($.type(fv) === "string");
+            if(ro) continue;
+            if(first_user_input == null) {
+                first_user_input = inp;
+            } 
+            if(v_empty) {
+                inp.select();
+                //if(user_answers.length < cur_task["answers"].length) return;
+            }
+            else {
+              user_answers.push(v);
+            }
+        }
+        */
+        if (cur_task['check_answer'](cur_task, user_answers)) {
+            if (!task_solved) {
+                var bTimeout = $('#timer').hasClass('bg-timer-end');
+                if (incorrect_answers > 0 || bTimeout) {
+                    if(bTimeout) {
+                        $('#total-timeouts').text(parseInt($('#total-timeouts').text()) + 1);
+                    }
+                    $('#log').prepend("<p class='log-right-not-first'>" + cur_task['fmt_answer'](user_answers, cur_task) + "</p>");
+                    all_tasks.push(cur_task);
+                }
+                else {
+                    $('#log').prepend("<p class='log-right'>" + cur_task['fmt_answer'](user_answers, cur_task) + "</p>");
+                }
+                if (!$('.task-answers').hasClass("bg-right")) {
+                    $('.task-answers').addClass('bg-right');
+                    task_solved = true;
+                    var n_solved = init_tasks.length - all_tasks.length;
+                    $('#total-solved').text(n_solved);
+                    setTimeout(new_task, 500);
+                }
+            }
+        }
+        else {
+            if(incorrect_answers == 0) {
+                $('#total-errors').text(parseInt($('#total-errors').text()) + 1);
+            }
+            ++incorrect_answers;
+            $('#log').prepend("<p class='log-wrong'>" + cur_task['fmt_answer'](user_answers, cur_task) + "</p>");
+            $('.task-answers').addClass('bg-wrong');
+            if(first_user_input) first_user_input.select();
+        }
+    }
+    function init_tasks_fn()
+    {
+        var fnCheckAnswerDataTransform = function(cur_task, user_answers) {
+            var bCorrect = false;
+            /*
+            var user_answers_sorted = [...user_answers];
+            user_answers_sorted.sort(function(a, b) { return a - b; });
+            if(user_answers_sorted.length == cur_task['answers'].length) {
+                bCorrect = true;
+                for(var i = 0; i < user_answers.length; ++i) {
+                    if(user_answers_sorted[i] !== cur_task['answers'][i]) {
+                        bCorrect = false;
+                        break;
+                    }
+                }
+            }*/
+            bCorrect = g_last_user_input_correct;
+            return bCorrect;
+        };
+        var fnFmtAnswerDataTransform = function(user_answers, task) {
+          return task['expr'] + ' формула: ' + user_answers.join(' × ');
+        };
+
+        // -----------------------------------------------------------------------------
+        // Tasks generation
+
+        var n_tests = all_options_map['n_tests'].value;
+        var a_min = 1;
+        var a_max = all_options_map['max_a'].value;
+        var minlen = all_options_map['minlen'].value;
+        var maxlen = all_options_map['maxlen'].value;
+        var max_shift = all_options_map['max_shift'].value;
+        var max_mul = all_options_map['max_mul'].value;
+        var max_array_shift = all_options_map['max_array_shift'].value;
+        var opt_hint_with_placeholders = true;
+        var n_min_transformations = all_options_map['min_transforms'].value;
+        var n_max_transformations = all_options_map['max_transforms'].value;
+
+
+        var transformation_types = {'shift': {}, 'mul': {}, 'array_shift': {}, 'array_reverse': {}, };
+        var cur_t_id = 0;
+        for(var t_name in transformation_types) 
+        {
+          t = transformation_types[t_name];
+          enabled_key_name = 'use_' + t_name;
+          t.enabled = (enabled_key_name in all_options_map) && all_options_map[enabled_key_name].value;
+          t.id = t.enabled ? cur_t_id++ : -1;
+        }
+        var total_number_of_allowed_transformations = cur_t_id;
+        if(total_number_of_allowed_transformations <= 0) {
+          alert("No transformations allowed");
+          return;
+        }
+
+        var init_tasks_t1 = new Array();
+        while(init_tasks_t1.length < n_tests)
+        {
+            var a = 0;
+            a = a_min + Math.floor(Math.random() * (a_max - a_min + 1));
+            use_len = minlen + Math.floor(Math.random() * (maxlen - minlen + 1));
+
+            var src_a = new Array();
+            var target_a = new Array();
+            for(var i = 0; i < use_len; ++i)
+            {
+              src = a + i;
+              src_a.push(src);
+              a = a + 1 + Math.floor(Math.random() * (a_max - a_min + 1));
+            }
+
+            var n_shift_num = (1 + Math.floor(Math.random() * max_shift)) * (Math.random() >= 0.5 ? 1 : -1 );
+            var n_mul_num = 2 + Math.floor(Math.random() * (max_mul - 2));
+            var n_shift_ar = 1 + Math.floor(Math.random() * max_array_shift);
+            var b_round_shift = Math.random() >= 0.5;
+
+            var n_transformations = n_min_transformations + Math.floor(Math.random() * (n_max_transformations - n_min_transformations + 1));
+            var use_transformation = Array(total_number_of_allowed_transformations).fill(false); // [false,] * total_number_of_allowed_transformations 
+            var use_transformation_order = Array();
+
+            // Selecting n_transformations transformations in random order
+            for(var i = 0; i < n_transformations; ++i) {
+              do {
+                n = Math.floor(Math.random() * total_number_of_allowed_transformations);
+              } while(use_transformation[n]);
+              use_transformation[n] = true;
+              use_transformation_order.push(n);
+            }
+
+            // Filling target_a with src_a
+            for(var i = 0; i < src_a.length; ++i) {
+              target = src_a[i];
+              target_a.push(target);
+            }
+
+            var used_transformation_text = Array();
+
+            // Applying transformations
+            for(const t of use_transformation_order)
+            {
+                if(t == transformation_types['shift'].id) {
+                  used_transformation_text.push('сложение/вычитание');
+                  for(var i = 0; i < target_a.length; ++i) {
+                    target_a[i] += n_shift_num;
+                  }
+                }
+                else if(t == transformation_types['mul'].id) {
+                  used_transformation_text.push('умножение');
+                  for(var i = 0; i < target_a.length; ++i) {
+                    target_a[i] *= n_mul_num;
+                  }
+                }
+                else if(t == transformation_types['array_shift'].id) {
+                  var prev_target_a = target_a;
+                  if(b_round_shift) {
+                    var target_a = Array(prev_target_a.length);
+                    used_transformation_text.push('циклический сдвиг массива');
+                    for(var i = 0; i < target_a.length; ++i) {
+                      target_a[i] = prev_target_a[(i + n_shift_ar) % prev_target_a.length];
+                    }
+                  }
+                  else {
+                    var target_a = Array(prev_target_a.length - n_shift_ar);
+                    used_transformation_text.push('сдвиг массива');
+                    for(var i = 0; i < target_a.length; ++i) {
+                      target_a[i] = prev_target_a[i + n_shift_ar];
+                    }
+                  }
+                }
+                else if(t == transformation_types['array_reverse'].id) {
+                  var prev_target_a = [...target_a];
+                  used_transformation_text.push('разворот массива');
+                  for(var i = 0; i < target_a.length; ++i) {
+                    target_a[i] = prev_target_a[target_a.length - 1 - i]
+                  }
+                }
+            }
+
+            expr_str = '[' + src_a.toString() + '] => [' + target_a + ']';
+            task = { 'expr': expr_str, 'check_answer': fnCheckAnswerDataTransform, 'fmt_answer': fnFmtAnswerDataTransform, 
+                'hint': used_transformation_text.join(", "), 'task_args': {'src': src_a, 'target': target_a, 'transform': used_transformation_text}};
+            for(var i = 0; i < src_a.length; ++i) {
+                task['f' + (i + 1)] = src_a[i];
+            }
+            for(var i = 0; i < target_a.length; ++i) {
+                task['s' + (i + 1)] = target_a[i];
+            }
+            init_tasks_t1.push(task);
+            n_retry = 0;
+        }
+
+        // -----------------------------------------------------------------------------
+        init_tasks = [].concat(init_tasks_t1/*, ...*/);
+        all_tasks = [...init_tasks];
+        $('#total-tasks').text(all_tasks.length);
+        $('#log').prepend("<p>Настройки: " + options_to_str() + "</p>");
+        $('#log').prepend("<p>" + (new Date()).toLocaleDateString() + " " +  (new Date()).toLocaleTimeString() + "</p>");
+        start_time = $.now();
+        time_to_solve = all_options_map['maxtime'].value * 1000;
+    }
+
+    var all_options = [
+        {'name': 'n_tests',           'description': 'Количество заданий',                    'type': 'number',  'value': 50,  'min-value': 1,  'max-value': 1000},
+        //{'name': 'complex',           'description': 'Сложность',                             'type': 'number',  'value': 0,   'min-value': 0,  'max-value': 100},
+        {'name': 'maxtime',           'description': 'Макс. время ответа (сек)',              'type': 'number',  'value': 300, 'min-value': 10, 'max-value': 600},
+        {'name': 'minlen',            'description': 'Минимальная длина набора данных',       'type': 'number',  'value': 8,   'min-value': 6,  'max-value': 12},
+        {'name': 'maxlen',            'description': 'Максимальная длина набора данных',      'type': 'number',  'value': 12,  'min-value': 6,  'max-value': 12},
+        {'name': 'max_a',             'description': 'Максимальное число',                    'type': 'number',  'value': 50,  'min-value': 10, 'max-value': 10000},
+        {'name': 'min_transforms',    'description': 'Минимальное количество преобразований', 'type': 'number',  'value': 1,   'min-value': 1,  'max-value': 4},
+        {'name': 'max_transforms',    'description': 'Максимальное количество преобразований','type': 'number',  'value': 2,   'min-value': 1,  'max-value': 4},
+        {'name': 'max_shift',         'description': 'Максимальное смещение ряда',            'type': 'number',  'value': 10,  'min-value': 1,  'max-value': 10000},
+        {'name': 'use_shift',         'description': 'Использовать смещение ряда',            'type': 'boolean', 'value': true},
+        {'name': 'max_mul',           'description': 'Максимальный множитель ряда',           'type': 'number',  'value': 2,   'min-value': 2,  'max-value': 100},
+        {'name': 'use_mul',           'description': 'Использовать множитель ряда',           'type': 'boolean', 'value': true},
+        {'name': 'max_array_shift',   'description': 'Максимальный сдвиг ряда',               'type': 'number',  'value': 2,   'min-value': 1,  'max-value': 10},
+        {'name': 'use_array_shift',   'description': 'Использовать сдвиг ряда',               'type': 'boolean', 'value': true},
+        {'name': 'use_array_reverse', 'description': 'Использовать разворот ряда',            'type': 'boolean', 'value': true},
+        {'name': 'show_hint',         'description': 'Подсказывать список преобразований',    'type': 'boolean', 'value': true},
+    ];
+    var all_options_map = {};
+
+    function init_ui_options()
+    {
+       for (let opt of all_options) 
+       {
+         var opt_html = '';
+         if(opt['type'] === 'number') {
+           opt_html = 
+           `<div class="input-group">
+             <div class="input-group-prepend"><span class="input-group-text">${opt['description']}</span></div>
+             <input min="${opt['min-value']}" max="${opt['max-value']}" value="${opt['value']}" type="text" class="form-control" name="input_text_testopt_${opt['name']}" id="input_text_testopt_${opt['name']}" onchange="rangeinput_testopt_${opt['name']}.value = input_text_testopt_${opt['name']}.value; on_updated_param('${opt['name']}', input_text_testopt_${opt['name']}.value);" />
+             <input min="${opt['min-value']}" max="${opt['max-value']}" value="${opt['value']}" step="1" type="range" class="form-control-range slider" type="range" id="rangeinput_testopt_${opt['name']}" onchange="input_text_testopt_${opt['name']}.value = rangeinput_testopt_${opt['name']}.value; on_updated_param('${opt['name']}', rangeinput_testopt_${opt['name']}.value);" oninput="input_text_testopt_${opt['name']}.value = rangeinput_testopt_${opt['name']}.value; on_updated_param('${opt['name']}', rangeinput_testopt_${opt['name']}.value);">
+           </div>`;
+         }
+         else if(opt['type'] === 'boolean') {
+           var checkbox_checked = opt["value"] ? "checked" : "";
+           opt_html = 
+           `<div class="input-group">
+             <span class="input-group-addon"><input type="checkbox" name="input_checkbox_testopt_${opt['name']}" id="input_checkbox_testopt_${opt['name']}" onchange="on_updated_param('${opt['name']}', input_checkbox_testopt_${opt['name']}.checked);" ${checkbox_checked} /></span>
+             <label class="form-control">${opt['description']}</label>
+            </div>`;
+           /*`<div class="input-group">
+             <div class="input-group-prepend"><span class="input-group-text">${opt['description']}</span></div>
+             <input type="checkbox" class="form-control form-control-checkbox" name="input_checkbox_testopt_${opt['name']}" id="input_checkbox_testopt_${opt['name']}" onchange="on_updated_param('${opt['name']}', input_checkbox_testopt_${opt['name']}.checked);" ${checkbox_checked} />
+           </div>`;*/
+         }
+         $('#test-options').append(opt_html);
+         all_options_map[opt['name']] = opt;
+       }
+    }
+    function update_ui_options_values(exclude_options = [])
+    {
+       for (let opt of all_options) 
+       {
+         if(exclude_options.includes(opt['name'])) continue;
+         if(opt['type'] === 'number') {
+           $(`#input_text_testopt_${opt['name']}`).val(opt['value'].toString());
+           $(`#rangeinput_testopt_${opt['name']}`).val(opt['value'].toString());
+           //console.log(`Setting UI ${opt['name']} to ${opt['value']}`);
+         }
+         else if(opt['type'] === 'boolean') {
+           $(`#input_checkbox_testopt_${opt['name']}`).prop("checked", opt['value']);
+           //console.log(`Setting UI ${opt['name']} to ${opt['value']}`);
+         }
+       }
+    }
+
+    function clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
+    function on_updated_param(opt_name, opt_value)
+    {
+      console.log(`Updated ${opt_name} to ${opt_value}`);
+      opt = all_options_map[opt_name];
+      if(opt['type'] === 'number') opt_value = parseInt(opt_value);
+      opt['value'] = opt_value;
+      /*
+      if(opt_name === 'complex') {
+        all_options_map['minfactors']['value'] = clamp(Math.floor(1 + opt_value / 30), 1, 3);
+        all_options_map['maxfactors']['value'] = clamp(Math.floor(2 + opt_value / 5), 1, 10);
+        all_options_map['max_a']['value'] = 100 + opt_value * 20;
+        all_options_map['placeholder_tips']['value'] = Math.floor(opt_value / 10) == 0;
+        update_ui_options_values([opt_value]);
+      }
+      else {
+        all_options_map['complex']['value'] = '?';
+        //update_ui_options_values(['complex']);
+      }
+      */
+    }
+
+    function options_to_str()
+    { 
+      return all_options.map( function( opt ) { 
+        return opt['description'] + ': ' + opt['value']; } 
+      ).join('; '); 
+    }
+
+    $(document).ready(function() {
+      init_ui_options();
+      $('#start-test-button').click(function()
+      {
+          $('#start-test-button').addClass('disabled');
+          $('#test-start-form').hide();
+          init_tasks_fn();
+          $("form").submit(function(f){
+              f.preventDefault();
+              check_task();
+          });
+          start_all();
+          $('#test-main').show();
+      });
+    });
+
+</script>
+</body>
+</html>
